@@ -1,0 +1,30 @@
+/* 인포윈도우 설정 */
+.infoWindow{
+    width: 25rem;
+    /* height:25rem; */
+    border: 1px solid black;
+    border-radius:5px;
+    background-color: withe;
+}
+
+.infoWindow-img-container{
+    width:100%;
+    /* height:100%; */
+    overflow:hidden;
+}
+
+.infoWindow-img{
+    width:100%;
+}
+
+.info-title{
+    font-size: 2rem;
+}
+
+.infoWindow-address{
+    font-size:1.6rem;
+}
+
+.infoWindow-btn{
+    font-size: 1.6rem;
+}

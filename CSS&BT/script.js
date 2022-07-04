@@ -26,7 +26,7 @@ const dataSet = [
 	{
 	  title: "희락돈까스",
 	  address: "서울 영등포구 양산로 210",
-	  url: "https://www.youtube.com/watch?v=1YOJbOUR4vw&t=88s",
+	  url: "https://www.youtube.com/watch?v=t_thfgLyKI8",
 	  category: "양식",
 	},
 	{
@@ -114,10 +114,33 @@ setMap();
 
 
 function getContent(data){
-	// 인포윈도우를 만들어서 리턴한다 ()
-	return `<div>hello</div>`;
+
+	// 유튜브 썸네일 id 가져오기
+	let replaceUrl = data.url;
+	let finUrl = '';
+	replaceUrl = replaceUrl.replace("https://youtu.be/", '');
+	replaceUrl = replaceUrl.replace("https://www.youtube.com/embed/", '');
+	replaceUrl = replaceUrl.replace("https://www.youtube.com/watch?v=", '');
+	finUrl = replaceUrl.split('&')[0]; 
+	// 인포윈도우를 만들어서 리턴한다 (). 백틱을 이용해 html에 집어넣는다
+	//  content: getContent(dataSet[i])
+	return `
+	<div class="infoWindow">
+      <div class="infoWindow-img-container">
+        <img src="https://img.youtube.com/vi/${finUrl}/mqdefault.jpg" class="infoWindow-img">  
+      </div>
+      <div class="infoWindow-body">
+        <h5 class="infoWindow-title">${data.title}</h5>
+        <p class="infoWindow-address">${data.address}</p>
+        <a href="${data.url}" class="infoWindow-btn" target="_blank">영상이동</a> <!--새창으로 이동하도록 target-->
+      </div>
+    </div>
+	
+	
+	`;
 }
 
+let infowindowArray=[];
 
 // 마커에 인포윈도우 붙이기
 
@@ -133,29 +156,47 @@ async function setMap(){
 
 
 	  // 마커에 표시할 인포윈도우를 생성합니다 
-	  var infowindow = new kakao.maps.InfoWindow({
+	var infowindow = new kakao.maps.InfoWindow({
         content: getContent(dataSet[i]) // 인포윈도우에 표시할 내용
     });
+	infowindowArray.push(infowindow); //생성될 때마다 객체 추가
 
     // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
     // 이벤트 리스너로는 클로저를 만들어 등록합니다 
     // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
-    kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
-    kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
+	// mouseover --> click
+    kakao.maps.event.addListener(marker, 'click', makeOverListener(map, marker, infowindow, coords)); //coords 인자 추가
+    kakao.maps.event.addListener(map, 'click', makeOutListener(infowindow)); // 지도를 클릭하면 꺼지게끔 한다
 }
+
+// 1. 클릭시 다른 인포위도우 닫기
+// 2. 클릭한 곳으로 지도 중심 옮기기
+
+
+
 
 	// 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
-	function makeOverListener(map, marker, infowindow) {
+	function makeOverListener(map, marker, infowindow, coords) {
      return function() {
+		// 클릭시 다른 인포윈도우 닫기
+		closeInfoWindow(); 
         infowindow.open(map, marker);
+		// 클릭한 곳으로 지도 중심 옮기기
+		map.panTo(coords);
     };
-}
+	}
+	//let infowindowArray=[];
+	function closeInfoWindow(){
+		for (let infowindow of infowindowArray){
+			infowindow.close();
+		}
+	}
 
 	// 인포윈도우를 닫는 클로저를 만드는 함수입니다 
-	function makeOutListener(infowindow) {
-     return function() {
-        infowindow.close();
-    };
-}
+  	function makeOutListener(infowindow) {
+       return function() {
+          infowindow.close();
+      };
+  }
 }
  
