@@ -17,9 +17,6 @@ map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
 var zoomControl = new kakao.maps.ZoomControl();
 map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
-
-
-
 // 더미데이터 생성
 
 const dataSet = [
@@ -109,9 +106,7 @@ function getCoordsByAddress(address){
 		});
  	}
 
-setMap();
-
-
+// setMap();
 
 function getContent(data){
 
@@ -140,12 +135,11 @@ function getContent(data){
 	`;
 }
 
-let infowindowArray=[];
-
 // 마커에 인포윈도우 붙이기
 
-async function setMap(){
-
+async function setMap(dataSet){
+	infowindowArray=[];
+	markerArray=[];
 	for (var i = 0; i < dataSet.length; i ++) {
 		// 마커 생성
 		let coords=await getCoordsByAddress(dataSet[i].address);
@@ -154,7 +148,7 @@ async function setMap(){
 		 position: coords, // 마커를 표시할 위치 (좌표로 변환된 coords 집어넣는다)
 	 });	 
 
-
+	 markerArray.push(marker);
 	  // 마커에 표시할 인포윈도우를 생성합니다 
 	var infowindow = new kakao.maps.InfoWindow({
         content: getContent(dataSet[i]) // 인포윈도우에 표시할 내용
@@ -168,15 +162,13 @@ async function setMap(){
     kakao.maps.event.addListener(marker, 'click', makeOverListener(map, marker, infowindow, coords)); //coords 인자 추가
     kakao.maps.event.addListener(map, 'click', makeOutListener(infowindow)); // 지도를 클릭하면 꺼지게끔 한다
 }
+}
 
 // 1. 클릭시 다른 인포위도우 닫기
 // 2. 클릭한 곳으로 지도 중심 옮기기
 
-
-
-
-	// 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
-	function makeOverListener(map, marker, infowindow, coords) {
+// 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
+function makeOverListener(map, marker, infowindow, coords) {
      return function() {
 		// 클릭시 다른 인포윈도우 닫기
 		closeInfoWindow(); 
@@ -184,19 +176,67 @@ async function setMap(){
 		// 클릭한 곳으로 지도 중심 옮기기
 		map.panTo(coords);
     };
-	}
-	//let infowindowArray=[];
-	function closeInfoWindow(){
+}
+let infowindowArray=[];
+function closeInfoWindow(){
 		for (let infowindow of infowindowArray){
 			infowindow.close();
 		}
-	}
+}
 
-	// 인포윈도우를 닫는 클로저를 만드는 함수입니다 
-  	function makeOutListener(infowindow) {
+// 인포윈도우를 닫는 클로저를 만드는 함수입니다 
+function makeOutListener(infowindow) {
        return function() {
           infowindow.close();
       };
-  }
 }
+
  
+/*
+-------------------카테고리 분류-----------------
+*/
+
+const categoryMap={
+	korea:"한식",
+	china:"중식",
+	japan:"일식",
+	america:"양식",
+	wheat:"분식",
+	meat:"구이",
+	sushi:"회/초밥",
+	etc:"기타"
+};
+
+const categoryList = document.querySelector(".category-list");
+categoryList.addEventListener("click", categoryHandler);
+
+function categoryHandler(event){
+	// event가 어떤 태그에서 일어났는지 등을 다 갖고 있다
+	//console.log(event.target.id);  -> 클릭하면 korea 등
+	const categoryId= event.target.id;
+	const category= categoryMap[categoryId];
+
+	//데이터 분류
+	// 카테고리에 해당하는 데이터만 뽑아내기
+	let categorizedDataSet=[];
+	for (let data of dataSet){
+		if(data.category===category){ //사용자가 클릭한 데이터와 일차한다면
+			categorizedDataSet.push(data);
+		} // 이제 한식을 누르면 한식 데이터만 뜨게끔 한다
+	}
+	// 기존 마커 삭제
+	closeMarker();
+	// 기존 인포윈도우 닫기
+	closeInfoWindow();
+	setMap(categorizedDataSet)
+}
+
+// closeMarker() 함수 작성
+let markerArray=[];
+function closeMarker(){
+	for(marker of markerArray){
+		marker.setMap(null);
+	}
+}
+
+setMap(dataSet);
