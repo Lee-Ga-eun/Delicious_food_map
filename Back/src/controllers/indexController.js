@@ -37,7 +37,7 @@ exports.readRestaurants = async function (req,res){
     const validCategory = [
       "한식", "중식", "일식", "양식", "분식", "구이", "회/초밥", "기타",
     ];
-    if (!validCategory.includes(category)){ //include가 뭘까?
+    if (!validCategory.includes(category)){ //include가 뭘까?(자바스크립트 요소 포함 여부, true/false 반환)
       return res.send({
         isSuccess: false, code:400, message:"유효한 카테고리가 아닙니다",
       });

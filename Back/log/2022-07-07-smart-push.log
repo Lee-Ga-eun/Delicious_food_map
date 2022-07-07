@@ -61,3 +61,7 @@
 {"level":"error","message":"readRestaurants DB Connection error\n: {\"code\":\"ER_BAD_DB_ERROR\",\"errno\":1049,\"sqlState\":\"42000\",\"sqlMessage\":\"Unknown database '맛집지도_DB'\"}","timestamp":"2022-07-07 19:02:16"}
 {"level":"info","message":"undefined - API Server Start At Port 3000","timestamp":"2022-07-07 19:04:16"}
 {"level":"info","message":"undefined - API Server Start At Port 3000","timestamp":"2022-07-07 19:04:19"}
+{"level":"info","message":"undefined - API Server Start At Port 3000","timestamp":"2022-07-07 19:20:46"}
+{"level":"info","message":"undefined - API Server Start At Port 3000","timestamp":"2022-07-07 19:20:49"}
+{"level":"info","message":"undefined - API Server Start At Port 3000","timestamp":"2022-07-07 22:47:09"}
+{"level":"info","message":"undefined - API Server Start At Port 3000","timestamp":"2022-07-07 22:47:30"}

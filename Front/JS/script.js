@@ -17,35 +17,29 @@ map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
 var zoomControl = new kakao.maps.ZoomControl();
 map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
-// 더미데이터 생성
+// **********************************************************
+// 더미데이터 준비: Axios로 식당 목록 조회 API를 요청
+async function getDataSet(category){
+	let qs = category;
+	if (!qs){
+		qs="";
+	}
+	
+	const dataSet = await axios({
+		method: "get",
+		url: `http://localhost:3000/restaurants?category=${qs}`,
+		headers: {}, // packet header
+		data: {}, // packet body
+	});
+	return dataSet.data.result; // console.log(dataSet) 해볼 것
+}
 
-const dataSet = [
-	{
-	  title: "희락돈까스",
-	  address: "서울 영등포구 양산로 210",
-	  url: "https://www.youtube.com/watch?v=t_thfgLyKI8",
-	  category: "양식",
-	},
-	{
-	  title: "즉석우동짜장",
-	  address: "서울 영등포구 대방천로 260",
-	  url: "https://www.youtube.com/watch?v=1YOJbOUR4vw&t=88s",
-	  category: "한식",
-	},
-	{
-	  title: "아카사카",
-	  address: "서울 서초구 서초대로74길 23",
-	  url: "https://www.youtube.com/watch?v=1YOJbOUR4vw&t=88s",
-	  category: "일식",
-	},
-  ];
+getDataSet();
+
 
 // // 주소-좌표 변환 객체를 생성합니다
 // var geocoder = new kakao.maps.services.Geocoder();
-
-
 //   for (var i = 0; i < dataSet.length; i ++) {
-
 // 	// 주소를 좌표로 변환하는 코드
 // 	geocoder.addressSearch(dataSet[i].address, function(result, status) {
 //     // 정상적으로 검색이 완료됐으면 
@@ -58,14 +52,12 @@ const dataSet = [
 //         position: coords, // 마커를 표시할 위치 (좌표로 변환된 coords 집어넣는다)
 //     });
 // 	});    
-
 // }
 
 // 비동기 처리로 구현
 var geocoder = new kakao.maps.services.Geocoder();
 
 // async function setMap(){
-
 // 	for (var i = 0; i < dataSet.length; i ++) {
 // 		// 마커 생성
 // 		let coords=await getCoordsByAddress(dataSet[i].address);
@@ -77,7 +69,6 @@ var geocoder = new kakao.maps.services.Geocoder();
 // 	   var infowindow = new kakao.maps.InfoWindow({
 //         content: positions[i].content // 인포윈도우에 표시할 내용
 //     });
-
 //     // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
 //     // 이벤트 리스너로는 클로저를 만들어 등록합니다 
 //     // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
@@ -85,7 +76,6 @@ var geocoder = new kakao.maps.services.Geocoder();
 //     kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
 // }
 //  }
-
 
 
 // 주소 -> 좌표 변환 함수
@@ -106,12 +96,9 @@ function getCoordsByAddress(address){
 		});
  	}
 
-// setMap();
-
 function getContent(data){
-
 	// 유튜브 썸네일 id 가져오기
-	let replaceUrl = data.url;
+	let replaceUrl = data.VideoURL;
 	let finUrl = '';
 	replaceUrl = replaceUrl.replace("https://youtu.be/", '');
 	replaceUrl = replaceUrl.replace("https://www.youtube.com/embed/", '');
@@ -125,9 +112,9 @@ function getContent(data){
         <img src="https://img.youtube.com/vi/${finUrl}/mqdefault.jpg" class="infoWindow-img">  
       </div>
       <div class="infoWindow-body">
-        <h5 class="infoWindow-title">${data.title}</h5>
-        <p class="infoWindow-address">${data.address}</p>
-        <a href="${data.url}" class="infoWindow-btn" target="_blank">영상이동</a> <!--새창으로 이동하도록 target-->
+        <h5 class="infoWindow-title">${data.RestaurantTitle}</h5>
+        <p class="infoWindow-address">${data.RestaurantAddress}</p>
+        <a href="${data.VideoURL}" class="infoWindow-btn" target="_blank">영상이동</a> <!--새창으로 이동하도록 target-->
       </div>
     </div>
 	
@@ -142,7 +129,8 @@ async function setMap(dataSet){
 	markerArray=[];
 	for (var i = 0; i < dataSet.length; i ++) {
 		// 마커 생성
-		let coords=await getCoordsByAddress(dataSet[i].address);
+		//let coords=await getCoordsByAddress(dataSet[i].address);
+		let coords=await getCoordsByAddress(dataSet[i].RestaurantAddress);
 		var marker = new kakao.maps.Marker({
 		 map: map, // 마커를 표시할 지도
 		 position: coords, // 마커를 표시할 위치 (좌표로 변환된 coords 집어넣는다)
@@ -210,33 +198,40 @@ const categoryMap={
 const categoryList = document.querySelector(".category-list");
 categoryList.addEventListener("click", categoryHandler);
 
-function categoryHandler(event){
+async function categoryHandler(event){
 	// event가 어떤 태그에서 일어났는지 등을 다 갖고 있다
 	//console.log(event.target.id);  -> 클릭하면 korea 등
 	const categoryId= event.target.id;
 	const category= categoryMap[categoryId];
-
+	try{
 	//데이터 분류
 	// 카테고리에 해당하는 데이터만 뽑아내기
-	let categorizedDataSet=[];
-	for (let data of dataSet){
-		if(data.category===category){ //사용자가 클릭한 데이터와 일차한다면
-			categorizedDataSet.push(data);
-		} // 이제 한식을 누르면 한식 데이터만 뜨게끔 한다
-	}
+	let categorizedDataSet = await getDataSet(category);
+	// for (let data of dataSet){
+	// 	if(data.category===category){ //사용자가 클릭한 데이터와 일차한다면
+	// 		categorizedDataSet.push(data);
+	// 	} // 이제 한식을 누르면 한식 데이터만 뜨게끔 한다
+	// }
 	// 기존 마커 삭제
 	closeMarker();
 	// 기존 인포윈도우 닫기
 	closeInfoWindow();
-	setMap(categorizedDataSet)
-}
+	setMap(categorizedDataSet);
+ } catch(error) {console.error(error);}}
 
 // closeMarker() 함수 작성
 let markerArray=[];
 function closeMarker(){
-	for(marker of markerArray){
+	for (marker of markerArray){
 		marker.setMap(null);
 	}
 }
 
-setMap(dataSet);
+async function setting(){
+	try{
+		const dataSet = await getDataSet();
+		setMap(dataSet);
+	} catch(error){console.error(error);}
+}
+
+setting();

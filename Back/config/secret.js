@@ -3,6 +3,6 @@ module.exports={
     host: "3.37.21.87",
     user: "root",
     port: "3306",
-    password: "qweasd123@",
-    database: "FoodMap",
+    password: "qweasd123@", 
+    database: "FoodMap", // 스키마
 };
