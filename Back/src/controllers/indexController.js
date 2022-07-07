@@ -29,3 +29,39 @@ exports.example = async function (req, res) {
     return false;
   }
 };
+
+exports.readRestaurants = async function (req,res){
+  const {category} = req.query;
+
+  if (category){
+    const validCategory = [
+      "한식", "중식", "일식", "양식", "분식", "구이", "회/초밥", "기타",
+    ];
+    if (!validCategory.includes(category)){ //include가 뭘까?
+      return res.send({
+        isSuccess: false, code:400, message:"유효한 카테고리가 아닙니다",
+      });
+    }
+  }
+  try{
+    const connection = await pool.getConnection(async (conn) => conn); //db연결
+    try{
+      const [rows] = await indexDao.selectRestaurants(connection, category);
+
+      return res.send({
+        result: rows,
+        isSuccess: true,
+        code: 200,
+        message: "식당 목록 요청 성공"
+      });
+    } catch (err) {
+      logger.error(`readRestaurants Query error\n: ${JSON.stringify(err)}`);
+      return false;
+    } finally{
+      connection.release();
+    }
+  }catch(err){
+    logger.error(`readRestaurants DB Connection error\n: ${JSON.stringify(err)}`); 
+    return false;
+  }
+};

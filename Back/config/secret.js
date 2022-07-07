@@ -4,5 +4,5 @@ module.exports={
     user: "root",
     port: "3306",
     password: "qweasd123@",
-    database: "맛집지도_DB",
+    database: "FoodMap",
 };
