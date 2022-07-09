@@ -31,13 +31,13 @@ exports.example = async function (req, res) {
 };
 
 exports.readRestaurants = async function (req,res){
-  const {category} = req.query;
+  const {Category} = req.query;
 
-  if (category){
+  if (Category){
     const validCategory = [
       "한식", "중식", "일식", "양식", "분식", "구이", "회/초밥", "기타",
     ];
-    if (!validCategory.includes(category)){ //include가 뭘까?(자바스크립트 요소 포함 여부, true/false 반환)
+    if (!validCategory.includes(Category)){ //include가 뭘까?(자바스크립트 요소 포함 여부, true/false 반환)
       return res.send({
         isSuccess: false, code:400, message:"유효한 카테고리가 아닙니다",
       });
@@ -46,13 +46,13 @@ exports.readRestaurants = async function (req,res){
   try{
     const connection = await pool.getConnection(async (conn) => conn); //db연결
     try{
-      const [rows] = await indexDao.selectRestaurants(connection, category);
+      const [rows] = await indexDao.selectRestaurants(connection, Category);
 
       return res.send({
         result: rows,
         isSuccess: true,
         code: 200,
-        message: "식당 목록 요청 성공"
+        message: "식당 목록 요청 성공",
       });
     } catch (err) {
       logger.error(`readRestaurants Query error\n: ${JSON.stringify(err)}`);

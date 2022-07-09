@@ -9,13 +9,13 @@ exports.exampleDao = async function (connection, params) {
   return rows;
 };
 
-exports.selectRestaurants = async function(connection, category){
-  const selectAllRestaurantsQuery =`select RestaurantTitle, RestaurantAddress, VideoURL, category from Restaurant where status='A';`;
-  const selectCategorizedRestaurantsQuery=`select RestaurantTitle, RestaurantAddress, VideoURL, category from Restaurant where status='A' and category=?;`;
+exports.selectRestaurants = async function(connection, Category){
+  const selectAllRestaurantsQuery =`select RestaurantTitle, RestaurantAddress, VideoURL, Category from Restaurant where status='A';`;
+  const selectCategorizedRestaurantsQuery=`select RestaurantTitle, RestaurantAddress, VideoURL, Category from Restaurant where status='A' and Category=?;`;
 
-  const Params = [category];
+  const Params = [Category];
 
-  const Query = category ? selectCategorizedRestaurantsQuery : selectAllRestaurantsQuery;
+  const Query = Category ? selectCategorizedRestaurantsQuery : selectAllRestaurantsQuery;
 
   const rows= await connection.query(Query,Params);
 

@@ -27,7 +27,7 @@ async function getDataSet(category){
 	
 	const dataSet = await axios({
 		method: "get",
-		url: `http://localhost:3000/restaurants?category=${qs}`,
+		url: `http://localhost:3000/restaurants?Category=${qs}`,
 		headers: {}, // packet header
 		data: {}, // packet body
 	});
@@ -35,7 +35,6 @@ async function getDataSet(category){
 }
 
 getDataSet();
-
 
 // // 주소-좌표 변환 객체를 생성합니다
 // var geocoder = new kakao.maps.services.Geocoder();
@@ -136,10 +135,10 @@ async function setMap(dataSet){
 		 position: coords, // 마커를 표시할 위치 (좌표로 변환된 coords 집어넣는다)
 	 });	 
 
-	 markerArray.push(marker);
+	markerArray.push(marker);
 	  // 마커에 표시할 인포윈도우를 생성합니다 
 	var infowindow = new kakao.maps.InfoWindow({
-        content: getContent(dataSet[i]) // 인포윈도우에 표시할 내용
+        content: getContent(dataSet[i]), // 인포윈도우에 표시할 내용
     });
 	infowindowArray.push(infowindow); //생성될 때마다 객체 추가
 
@@ -147,10 +146,11 @@ async function setMap(dataSet){
     // 이벤트 리스너로는 클로저를 만들어 등록합니다 
     // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
 	// mouseover --> click
-    kakao.maps.event.addListener(marker, 'click', makeOverListener(map, marker, infowindow, coords)); //coords 인자 추가
-    kakao.maps.event.addListener(map, 'click', makeOutListener(infowindow)); // 지도를 클릭하면 꺼지게끔 한다
+    kakao.maps.event.addListener(marker, "click", makeOverListener(map, marker, infowindow, coords)); //coords 인자 추가
+    kakao.maps.event.addListener(map, "click", makeOutListener(infowindow)); // 지도를 클릭하면 꺼지게끔 한다
 }
-}
+} 
+  
 
 // 1. 클릭시 다른 인포위도우 닫기
 // 2. 클릭한 곳으로 지도 중심 옮기기
@@ -192,7 +192,7 @@ const categoryMap={
 	wheat:"분식",
 	meat:"구이",
 	sushi:"회/초밥",
-	etc:"기타"
+	etc:"기타",
 };
 
 const categoryList = document.querySelector(".category-list");
@@ -200,32 +200,43 @@ categoryList.addEventListener("click", categoryHandler);
 
 async function categoryHandler(event){
 	// event가 어떤 태그에서 일어났는지 등을 다 갖고 있다
-	//console.log(event.target.id);  -> 클릭하면 korea 등
+      // 클릭하면 korea 등
 	const categoryId= event.target.id;
+	//console.log(categoryMap[categoryId]);
 	const category= categoryMap[categoryId];
+
 	try{
 	//데이터 분류
 	// 카테고리에 해당하는 데이터만 뽑아내기
 	let categorizedDataSet = await getDataSet(category);
+	console.log("카테고르핸들러",categorizedDataSet);
+
 	// for (let data of dataSet){
 	// 	if(data.category===category){ //사용자가 클릭한 데이터와 일차한다면
 	// 		categorizedDataSet.push(data);
 	// 	} // 이제 한식을 누르면 한식 데이터만 뜨게끔 한다
 	// }
 	// 기존 마커 삭제
+	//**************에러의 원인. closeMarker */
 	closeMarker();
+	console.log(1);
+	//console.log(categorizedDataSet);
 	// 기존 인포윈도우 닫기
 	closeInfoWindow();
+	console.log("인포윈도우 닫히나");
 	setMap(categorizedDataSet);
- } catch(error) {console.error(error);}}
 
-// closeMarker() 함수 작성
-let markerArray=[];
-function closeMarker(){
-	for (marker of markerArray){
-		marker.setMap(null);
-	}
-}
+    } catch(error){
+	console.error("에러란다");}}
+
+//closeMarker() 함수 작성
+ let markerArray=[];
+ function closeMarker(){
+ 	console.log(markerArray);
+ 	for (marker of markerArray){
+ 		marker.setMap(null);
+ 	}
+ }
 
 async function setting(){
 	try{
