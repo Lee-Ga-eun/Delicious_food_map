@@ -10,5 +10,6 @@ module.exports = function (app) {
   // 회원가입 api, 로그인 api, 토큰 검증 api 
   app.get("/restaurants", index.readRestaurants);
   app.post("/register", index.createRegister); //회원가입
+  app.post("/login", index.AccessLogin);
 
 };
