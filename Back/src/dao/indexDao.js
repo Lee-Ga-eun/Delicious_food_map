@@ -12,6 +12,17 @@ exports.InsertUsers= async function(connection, userID, password, nickname){
   
 };
 
+// 유효한 회원인지 검증한다. 방법은,,,,,, USER Table의 status로 체크 
+exports.validatedUser = async function(connection,userID, password){
+
+  const Query= `select userIdx, nickname from USER where userID=? and password=? and status='A';`;
+  const Params= [userID, password]
+
+  //const params=
+  const rows= await connection.query(Query,Params)
+  return rows;
+
+};
 
 exports.exampleDao = async function (connection, params) {
   const Query = ``;
