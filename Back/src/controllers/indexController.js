@@ -5,6 +5,73 @@ const secret = require("../../config/secret");
 
 const indexDao = require("../dao/indexDao");
 
+
+/*
+회원가입 api: createRegister
+1.파라미터로 userId, nickname,password 받아오기, 
+2.정규식을 통해 올바른지 1차 거르기, 
+3.걸러진 것을 토대로 DB에 회원정보 입력
+4. 토큰 만들기: jsonwebtoken, 
+*/
+
+exports.createRegister = async function(req,res){
+  // 데이터 불러오기
+  const {userID, password, nickname} = req.body; //req.body:JSON의 데이터를 담는다. 주소에선 확인 불가능하다
+  // 아이디, 패스워드로 적합한지 검증하기 위한 검증식 생성
+  const validate_userID= /^[a-z]+[a-z0-9]{5,19}$/; // 영문자로 시작하는 영문자 또는 숫자 6-20; 
+  //const validate_password=/^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,16}$/; //비밀번호 정규식 8-16 문자, 숫자 조합
+  const passwordRegExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,16}$/;
+  console.log({userID});
+  //검증: test함수 사용 (true, false 반환함)
+  if(!validate_userID.test(userID)){
+    return res.send({
+      isSuccess: false,
+      code: 400,
+      message: "아이디는 숫자와 영문만 입력 가능합니다",
+    });
+  }
+  console.log("아이디 통과");
+  if(!passwordRegExp.test(password)){
+    return res.send({
+      isSuccess: false,
+      code: 400, // 요청 실패시 400번대 코드
+      message: "비밀번호 정규식 8-16 문자, 숫자 조합",
+    });
+  }
+  console.log("비밀번호 통과?");
+  
+
+  //검증 끝. 통과한 객체들을 가지고 이제 DB에 입력한다. try문에 넣는다
+  try{
+    const connection = await pool.getConnection(async (conn) => conn); //db연결
+
+    try{
+      // DB입력.
+      const [rows] = await indexDao.InsertUsers(connection, userID, password, nickname);
+      console.log(rows);
+      //rows에 insertId가 나왔다 치고, (row의 key값: 여기선 userIdx): 이걸 가지고 jwt를 만든다
+      const userIdx=rows.insertId;
+      //jwt 생성
+      // sign(payload, 비밀키), payload엔 내가 데이터로 쓰고자 하는 것(비번은 빠진다 여기서),비밀키는 secret에 들어있다
+      const token=jwt.sign(
+        {userIdx:userIdx, nickname:nickname}, secret.jwtsecret
+      );
+      //try문 이제 끝내자!
+      return res.send({
+        result: {jwt:token},
+        isSuccess:true,
+        code:200,
+        message:"회원가입 성공",
+      })
+    }catch(err){logger.error(`createUsers Query error\n: ${JSON.stringify(err)}`);
+    return false;}finally{connection.release();}
+  }catch(err){logger.error(`createUsers DB connection error\n: ${JSON.stringify(err)}`);
+  return false;}
+  
+};
+
+
+//******************************************** */
 // 예시 코드
 exports.example = async function (req, res) {
   try {
@@ -65,3 +132,4 @@ exports.readRestaurants = async function (req,res){
     return false;
   }
 };
+
