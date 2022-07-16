@@ -70,6 +70,63 @@ exports.createRegister = async function(req,res){
   
 };
 
+//***************** *********************/
+// 로그인 api
+exports.AccessLogin = async function(req,res){
+  /*
+  request로 회원가입 정보를 받아온다
+  잘 넘어왔는지 검증한다
+  indexDao.js에서 데이터를 파라미터로 받아온다
+  내용확인한다
+  jwt 발급한다
+  */
+ const {userID, password} = req.body;
+
+ if(!userID||!password){
+  return res.send({
+    isSuccess:false,
+    code:400,
+    message:"회원정보를 입력해주세요",
+  });
+ }
+
+ try{
+  //DB 연결
+  const connection = await pool.getConnection(async(conn)=>(conn));
+  try{
+    // indexDao에서 파라미터 넘겨받아야 할 것
+    const [rows] = await indexDao.validatedUser(connection,userID, password);
+
+    // 검증
+    if(rows.length<1){
+      return res.send({
+        isSuccess:false,
+        code:400,
+        message:"회원정보가 없습니다",
+      });
+    }
+    
+    const {userIdx, nickname} = rows[0];
+    //rows[0].userIdx
+
+    //JWT 발급
+    const token = jwt.sign(
+      {userIdx:userIdx, nickname:nickname}, secret.jwtsecret
+    );
+    return res.send({
+      result:{jwt:token},
+      isSucces:true,
+      code:200,
+      message:"로그인 성공",
+
+    });
+
+  }catch(err){logger.error(`AccessLogin Query error\n: ${JSON.stringify(err)}`);
+  return false;}finally{connection.release();}
+ }catch(err){logger.error(`AccessLogin DB connection error\n: ${JSON.stringify(err)}`);
+ return false;}
+
+};
 
 //******************************************** */
 // 예시 코드
