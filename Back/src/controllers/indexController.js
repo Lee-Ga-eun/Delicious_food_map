@@ -6,6 +6,9 @@ const secret = require("../../config/secret");
 const indexDao = require("../dao/indexDao");
 
 
+/*토큰 검증 api*/
+ 
+
 /*
 회원가입 api: createRegister
 1.파라미터로 userId, nickname,password 받아오기, 
@@ -81,7 +84,7 @@ exports.AccessLogin = async function(req,res){
   jwt 발급한다
   */
  const {userID, password} = req.body;
-
+ 
  if(!userID||!password){
   return res.send({
     isSuccess:false,
