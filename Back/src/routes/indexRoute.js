@@ -11,5 +11,6 @@ module.exports = function (app) {
   app.get("/restaurants", index.readRestaurants);
   app.post("/register", index.createRegister); //회원가입
   app.post("/login", index.AccessLogin);
-
+  //jwt 미들웨어
+  app.get("/login",jwtMiddleware, index.validation_token);
 };
